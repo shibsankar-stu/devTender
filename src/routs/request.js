@@ -14,7 +14,6 @@ requestRouter.post("/send/:status/:toUserId", adminAuth, async (req, res) => {
     }
 
     const toUser = await User.findById(toUserId);
-    console.log(toUser);
     if (!toUser) {
       return res.status(404).json({
         message: "User Not Found",
@@ -53,6 +52,52 @@ requestRouter.post("/send/:status/:toUserId", adminAuth, async (req, res) => {
   } catch (error) {
     res.send("Some Error");
   }
+});
+
+requestRouter.post("/review/:status/:requestedId", adminAuth, async (req, res) => {
+    
+    //validate the status
+    //status == interested
+    //validate the requestedId
+    // toUserId == loged in user
+
+    try {
+      const status =req.params.status;
+      const requestId = req.params.requestedId;
+      const toUserId = req.user._id;
+      if (!status || !requestId) {
+        return res.status(400).json({ message: "Invalid request" });
+      }
+
+      const connectionRequest = await ConnectionRequestModel.findOne({_id: requestId, toUserId, status: "interested"});
+      if (!connectionRequest) {
+        return res.status(404).json({ message: "Connection Request Not Found" });
+      }
+
+      if (status === "accepted") {
+        connectionRequest.status = "accepted";
+        await connectionRequest.save();
+        return res.status(200).json({
+          message: "Connection Request Reviewed",
+          connectionRequest: connectionRequest,
+        })
+      }
+    
+      if (status === "rejected") {
+        connectionRequest.status = "rejected";
+        await connectionRequest.save();
+        return res.status(200).json({
+          message: "Connection Request Reviewed",
+          connectionRequest: connectionRequest,
+        })
+      }else{
+        return res.status(400).json({ message: "Invalid Status" });
+      }
+    
+    } catch (error) {
+      console.error("Error in review request:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
 });
 
 module.exports = {

@@ -6,6 +6,7 @@ const {authRouter} = require("./routs/auth")
 const {profileRouter} = require("./routs/profile");
 const { requestRouter } = require("./routs/request");
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
@@ -15,6 +16,7 @@ app.use(cookieParser());
 app.use("/", authRouter)
 app.use("/profile", profileRouter)
 app.use("/request", requestRouter)
+
 
 connectDB().then(() => {
   console.log("MongoDB Connected");
